@@ -7,6 +7,8 @@ public class Rocket : MonoBehaviour
 {
     Rigidbody rigidBody;
     AudioSource audioSource;
+    [SerializeField] float thrustMultiplier = 100f;
+
     enum RotateDirection { LEFT, RIGHT };
 
     // Use this for initialization
@@ -22,25 +24,26 @@ public class Rocket : MonoBehaviour
         ProcessInput();
     }
 
-    private void thrust()
+    private void Thrust()
     {
-        rigidBody.AddRelativeForce(Vector3.up);
+        FreezeRotation();
+        rigidBody.AddRelativeForce(Vector3.up * thrustMultiplier * 10 * Time.deltaTime);
     }
 
-    private void rotate(RotateDirection direction)
+    private void Rotate(RotateDirection direction)
     {
         switch (direction)
         {
             case RotateDirection.LEFT:
-                transform.Rotate(Vector3.forward * 90 * Time.deltaTime);
+                transform.Rotate(Vector3.forward * thrustMultiplier * Time.deltaTime);
                 break;
             case RotateDirection.RIGHT:
-                transform.Rotate(Vector3.back * 90 * Time.deltaTime);
+                transform.Rotate(Vector3.back * thrustMultiplier * Time.deltaTime);
                 break;
         }
     }
 
-    private void playThrustSound()
+    private void PlayThrustSound()
     {
         if (!audioSource.isPlaying)
         {
@@ -60,8 +63,8 @@ public class Rocket : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Space))
         {
-            thrust();
-            playThrustSound();
+            Thrust();
+            PlayThrustSound();
         }
         else
         {
@@ -69,11 +72,25 @@ public class Rocket : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.A))
         {
-            rotate(RotateDirection.LEFT);
+            FreezeRotation();
+            Rotate(RotateDirection.LEFT);
+            UnfreezeRotation();
         }
         else if (Input.GetKey(KeyCode.D))
         {
-            rotate(RotateDirection.RIGHT);
+            FreezeRotation();
+            Rotate(RotateDirection.RIGHT);
+            UnfreezeRotation();
         }
+    }
+
+    private void FreezeRotation()
+    {
+        rigidBody.freezeRotation = true;
+    }
+
+    private void UnfreezeRotation()
+    {
+        rigidBody.freezeRotation = false;
     }
 }
