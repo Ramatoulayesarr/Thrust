@@ -28,6 +28,7 @@ public class Rocket : MonoBehaviour
     {
         FreezeRotation();
         rigidBody.AddRelativeForce(Vector3.up * thrustMultiplier * 10 * Time.deltaTime);
+        UnfreezeRotation();
     }
 
     private void Rotate(RotateDirection direction)
@@ -51,7 +52,7 @@ public class Rocket : MonoBehaviour
         }
     }
 
-    private void stopThrustSound()
+    private void StopThrustSound()
     {
         if (audioSource.isPlaying)
         {
@@ -68,19 +69,15 @@ public class Rocket : MonoBehaviour
         }
         else
         {
-            stopThrustSound();
+            StopThrustSound();
         }
         if (Input.GetKey(KeyCode.A))
         {
-            FreezeRotation();
             Rotate(RotateDirection.LEFT);
-            UnfreezeRotation();
         }
         else if (Input.GetKey(KeyCode.D))
         {
-            FreezeRotation();
             Rotate(RotateDirection.RIGHT);
-            UnfreezeRotation();
         }
     }
 
