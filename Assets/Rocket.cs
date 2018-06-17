@@ -84,6 +84,19 @@ public class Rocket : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        switch (collision.gameObject.tag)
+        {
+            case "Friendly":
+                print("Collided with friend");
+                break;
+            default:
+                print("Lost!");
+                break;
+        }
+    }
+
     private void FreezeRotation()
     {
         rigidBody.freezeRotation = true;
