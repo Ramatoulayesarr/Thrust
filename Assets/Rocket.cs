@@ -9,6 +9,9 @@ public class Rocket : MonoBehaviour
     Rigidbody rigidBody;
     AudioSource audioSource;
     [SerializeField] float thrustMultiplier = 100f;
+    [SerializeField] AudioClip mainEngineSound;
+    [SerializeField] AudioClip deathSound;
+    [SerializeField] AudioClip winSound;
 
     enum RotateDirection { LEFT, RIGHT };
     enum State { ALIVE, DYING, TRANSCENDING };
@@ -28,9 +31,23 @@ public class Rocket : MonoBehaviour
         {
             ProcessInput();
         }
-        else
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (state != State.ALIVE) return;
+   
+        switch (collision.gameObject.tag)
         {
-            StopThrustSound();
+            case "Friendly":
+                print("Collided with friend");
+                break;
+            case "Finish":
+                ProcessVictory();
+                break;
+            default:
+                ProcessLoss();
+                break;
         }
     }
 
@@ -58,7 +75,7 @@ public class Rocket : MonoBehaviour
     {
         if (!audioSource.isPlaying)
         {
-            audioSource.Play();
+            audioSource.PlayOneShot(mainEngineSound);
         }
     }
 
@@ -72,6 +89,12 @@ public class Rocket : MonoBehaviour
 
     private void ProcessInput()
     {
+        ProcessThrustInput();
+        ProcessRotateInput();
+    }
+
+    private void ProcessThrustInput()
+    {
         if (Input.GetKey(KeyCode.Space))
         {
             Thrust();
@@ -81,6 +104,10 @@ public class Rocket : MonoBehaviour
         {
             StopThrustSound();
         }
+    }
+
+    private void ProcessRotateInput()
+    {
         if (Input.GetKey(KeyCode.A))
         {
             Rotate(RotateDirection.LEFT);
@@ -91,23 +118,22 @@ public class Rocket : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void ProcessVictory()
     {
-        switch (collision.gameObject.tag)
-        {
-            case "Friendly":
-                print("Collided with friend");
-                break;
-            case "Finish":
-                state = State.TRANSCENDING;
-                Invoke("LoadNextLevel", 1f);
-                break;
-            default:
-                state = State.DYING;
-                Invoke("LoadFirstLevel", 1f);
-                break;
-        }
+        state = State.TRANSCENDING;
+        audioSource.Stop();
+        audioSource.PlayOneShot(winSound);
+        Invoke("LoadNextLevel", 1f);
     }
+
+    private void ProcessLoss()
+    {
+        state = State.DYING;
+        audioSource.Stop();
+        audioSource.PlayOneShot(deathSound);
+        Invoke("LoadFirstLevel", 1f);
+    }
+
 
     private void LoadNextLevel()
     {
