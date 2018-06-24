@@ -13,6 +13,11 @@ public class Rocket : MonoBehaviour
     [SerializeField] AudioClip deathSound;
     [SerializeField] AudioClip winSound;
 
+    [SerializeField] ParticleSystem thrustParticles;
+    [SerializeField] ParticleSystem deathParticles;
+    [SerializeField] ParticleSystem successParticles;
+
+
     enum RotateDirection { LEFT, RIGHT };
     enum State { ALIVE, DYING, TRANSCENDING };
     State state = State.ALIVE;
@@ -53,6 +58,8 @@ public class Rocket : MonoBehaviour
 
     private void Thrust()
     {
+        PlayThrustSound();
+        PlayThrustParticles();
         FreezeRotation();
         rigidBody.AddRelativeForce(Vector3.up * thrustMultiplier * 10 * Time.deltaTime);
         UnfreezeRotation();
@@ -87,6 +94,19 @@ public class Rocket : MonoBehaviour
         }
     }
 
+    private void PlayThrustParticles()
+    {
+        thrustParticles.Play();
+    }
+
+    private void StopThrustParticles()
+    {
+        if (thrustParticles.isPlaying)
+        {
+            thrustParticles.Stop();
+        }
+    }
+
     private void ProcessInput()
     {
         ProcessThrustInput();
@@ -98,11 +118,11 @@ public class Rocket : MonoBehaviour
         if (Input.GetKey(KeyCode.Space))
         {
             Thrust();
-            PlayThrustSound();
         }
         else
         {
             StopThrustSound();
+            StopThrustParticles();
         }
     }
 
@@ -121,16 +141,20 @@ public class Rocket : MonoBehaviour
     private void ProcessVictory()
     {
         state = State.TRANSCENDING;
-        audioSource.Stop();
+        StopThrustSound();
+        StopThrustParticles();
         audioSource.PlayOneShot(winSound);
+        successParticles.Play();
         Invoke("LoadNextLevel", 1f);
     }
 
     private void ProcessLoss()
     {
         state = State.DYING;
-        audioSource.Stop();
+        StopThrustSound();
+        StopThrustParticles();
         audioSource.PlayOneShot(deathSound);
+        deathParticles.Play();
         Invoke("LoadFirstLevel", 1f);
     }
 
