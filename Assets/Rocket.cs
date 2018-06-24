@@ -11,6 +11,8 @@ public class Rocket : MonoBehaviour
     [SerializeField] float thrustMultiplier = 100f;
 
     enum RotateDirection { LEFT, RIGHT };
+    enum State { ALIVE, DYING, TRANSCENDING };
+    State state = State.ALIVE;
 
     // Use this for initialization
     void Start()
@@ -22,7 +24,14 @@ public class Rocket : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ProcessInput();
+        if (state == State.ALIVE)
+        {
+            ProcessInput();
+        }
+        else
+        {
+            StopThrustSound();
+        }
     }
 
     private void Thrust()
@@ -90,12 +99,24 @@ public class Rocket : MonoBehaviour
                 print("Collided with friend");
                 break;
             case "Finish":
-                SceneManager.LoadScene(1);
+                state = State.TRANSCENDING;
+                Invoke("LoadNextLevel", 1f);
                 break;
             default:
-                SceneManager.LoadScene(0);
+                state = State.DYING;
+                Invoke("LoadFirstLevel", 1f);
                 break;
         }
+    }
+
+    private void LoadNextLevel()
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    private void LoadFirstLevel()
+    {
+        SceneManager.LoadScene(0);
     }
 
     private void FreezeRotation()
